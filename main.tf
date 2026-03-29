@@ -49,11 +49,7 @@ resource "yandex_compute_instance" "platform" {
     nat       = true
   }
 
-  metadata = {
-    serial-port-enable = 1
-    ssh-keys           = "ubuntu:${var.vms_ssh_root_key}"
-  }
-
+  metadata = var.vms_metadata
 }
 
 resource "yandex_compute_instance" "platform01" {
@@ -80,9 +76,5 @@ resource "yandex_compute_instance" "platform01" {
     nat       = true
   }
 
-  metadata = {
-    serial-port-enable = 1
-    ssh-keys           = "ubuntu:${var.vms_ssh_root_key}"
-  }
-
+  metadata = var.vms_metadata
 }
