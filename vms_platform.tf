@@ -13,6 +13,17 @@ variable "vm_db_instance_name" {
   default = "netology-develop-platform-db"
 }
 
+variable "vm_gw-web_instance_name" {
+  type    = string
+  default = "netology-develop-platform-gw"
+}
+
+variable "vm_gw-db_instance_name" {
+  type    = string
+  default = "netology-develop-platform01-gw"
+}
+
+
 /*###ssh vars
 variable "vms_ssh_root_key" {
   type        = string

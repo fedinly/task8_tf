@@ -12,15 +12,44 @@ resource "yandex_vpc_subnet" "develop" {
   zone           = var.default_zone
   network_id     = yandex_vpc_network.develop.id
   v4_cidr_blocks = var.default_cidr
+  route_table_id = yandex_vpc_route_table.rt_web.id
 }
 
 resource "yandex_vpc_subnet" "develop_db" {
   name           = var.vpc_db_name
-  zone           = "ru-central1-b"
+  zone           = var.db_zone
   network_id     = yandex_vpc_network.develop_db.id
   v4_cidr_blocks = var.db_cidr
+  route_table_id = yandex_vpc_route_table.rt_db.id
 }
 
+resource "yandex_vpc_gateway" "nat_gateway_web" {
+  name = local.name_gw1
+  shared_egress_gateway {}
+}
+
+resource "yandex_vpc_route_table" "rt_web" {
+  name = "route-table-web"
+  network_id = yandex_vpc_network.develop.id
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id         = yandex_vpc_gateway.nat_gateway_web.id
+  }
+}
+
+resource "yandex_vpc_gateway" "nat_gateway_db" {
+  name = local.name_gw2
+  shared_egress_gateway {}
+}
+
+resource "yandex_vpc_route_table" "rt_db" {
+  name = "route-table-db"
+  network_id = yandex_vpc_network.develop_db.id
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id         = yandex_vpc_gateway.nat_gateway_db.id
+  }
+}
 
 data "yandex_compute_image" "ubuntu" {
   family = var.vm_image_name
@@ -46,7 +75,7 @@ resource "yandex_compute_instance" "platform" {
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.develop.id
-    nat       = true
+    nat       = false
   }
 
   metadata = var.vms_metadata
@@ -73,7 +102,7 @@ resource "yandex_compute_instance" "platform01" {
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.develop_db.id
-    nat       = true
+    nat       = false
   }
 
   metadata = var.vms_metadata
